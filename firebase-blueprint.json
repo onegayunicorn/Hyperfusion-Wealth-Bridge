@@ -1,5 +1,19 @@
 {
   "entities": {
+    "QuantumNFTNode": {
+      "title": "Quantum NFT Node",
+      "description": "Hardware node configuration for quantum sensor data",
+      "type": "object",
+      "properties": {
+        "nodeId": { "type": "string" },
+        "ownerUid": { "type": "string" },
+        "sensorType": { "type": "string" },
+        "status": { "type": "string", "enum": ["online", "offline", "calibrating"] },
+        "lastReading": { "type": "number" },
+        "lastUpdated": { "type": "string", "format": "date-time" }
+      },
+      "required": ["nodeId", "ownerUid", "sensorType"]
+    },
     "User": {
       "title": "User",
       "description": "User profile and wallet information",
@@ -70,6 +84,10 @@
     "/nfts/{nftId}": {
       "schema": "NFT",
       "description": "Global NFT marketplace items"
+    },
+    "/quantum-nodes/{nodeId}": {
+      "schema": "QuantumNFTNode",
+      "description": "Quantum NFT sensor nodes"
     },
     "/lending/{positionId}": {
       "schema": "LendingPosition",

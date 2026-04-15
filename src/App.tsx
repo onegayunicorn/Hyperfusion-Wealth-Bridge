@@ -119,8 +119,18 @@ export default function App() {
                   <h2 className="text-2xl font-light">Digital Assets Gallery</h2>
               </div>
               <div className="flex gap-2">
-                  <span className="bg-white/5 px-3 py-1.5 rounded-full border border-border text-[11px] text-text-secondary">Sort: Lowest Price</span>
-                  <span className="bg-white/5 px-3 py-1.5 rounded-full border border-border text-[11px] text-text-secondary">Filter: Star Seeds</span>
+                  <select className="bg-white/5 px-3 py-1.5 rounded-full border border-border text-[11px] text-text-secondary focus:outline-none">
+                    <option>All Types</option>
+                    <option>Star Seeds</option>
+                    <option>Quantum Nodes</option>
+                  </select>
+                  <select className="bg-white/5 px-3 py-1.5 rounded-full border border-border text-[11px] text-text-secondary focus:outline-none">
+                    <option>Price: Low to High</option>
+                    <option>Price: High to Low</option>
+                  </select>
+                  <label className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-border text-[11px] text-text-secondary">
+                    <input type="checkbox" /> For Sale
+                  </label>
               </div>
           </div>
 
@@ -129,10 +139,10 @@ export default function App() {
                   <div className="w-full aspect-square bg-[linear-gradient(45deg,#1a1a20,#2c2c35)] rounded-lg mb-3 relative overflow-hidden">
                     <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover:opacity-100 transition"></div>
                   </div>
-                  <div className="text-[13px] mb-1">Plasma Seed #402</div>
+                  <div className="text-[13px] mb-1">Quantum Sensor Node #A1</div>
                   <div className="flex justify-between text-[11px] text-text-secondary">
-                      <span>Floor: 0.42 ETH</span>
-                      <span>Lvl: 92.5</span>
+                      <span>Status: Online</span>
+                      <span>Reading: 0.99</span>
                   </div>
               </div>
           </div>
@@ -153,18 +163,21 @@ export default function App() {
           </div>
 
           <div className="bg-panel border border-border rounded-xl p-4">
-              <div className="text-[11px] uppercase text-text-muted mb-3">Decentralized Lending</div>
+              <div className="text-[11px] uppercase text-text-muted mb-3">Trading Bot Config</div>
               <div className="space-y-3">
                 <div className="flex justify-between text-[12px]">
-                  <span className="text-text-secondary">Total Deposited</span>
-                  <span className="font-bold">$2.4M</span>
+                  <span className="text-text-secondary">Strategy</span>
+                  <select className="bg-bg border border-border text-[11px] rounded px-1">
+                    <option>Trend Following</option>
+                    <option>Arbitrage</option>
+                  </select>
                 </div>
                 <div className="flex justify-between text-[12px]">
-                  <span className="text-text-secondary">Net APY</span>
-                  <span className="text-[#00ff00] font-bold">12.4%</span>
+                  <span className="text-text-secondary">Risk Level</span>
+                  <input type="range" className="w-20" />
                 </div>
-                <button className="w-full py-2 bg-white/5 border border-border rounded text-[11px] font-bold hover:bg-white/10 transition">
-                  MANAGE POSITIONS
+                <button className="w-full py-2 bg-accent text-black font-bold rounded text-[11px] hover:opacity-90 transition">
+                  ACTIVATE BOT
                 </button>
               </div>
           </div>
