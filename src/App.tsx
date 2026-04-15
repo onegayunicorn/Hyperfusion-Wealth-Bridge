@@ -17,14 +17,18 @@ export default function App() {
       if (currentUser) {
         // Ensure user document exists
         const userRef = doc(db, 'users', currentUser.uid);
-        await setDoc(userRef, {
-          uid: currentUser.uid,
-          email: currentUser.email,
-          displayName: currentUser.displayName,
-          gayaWalletAddress: `GAYA_${currentUser.uid.slice(0, 8)}`, // Mock Gaya wallet address
-          balanceLux: 1000, // Starting balance
-          lastLogin: serverTimestamp()
-        }, { merge: true });
+        try {
+          await setDoc(userRef, {
+            uid: currentUser.uid,
+            email: currentUser.email,
+            displayName: currentUser.displayName,
+            gayaWalletAddress: `GAYA_${currentUser.uid}_${Math.random().toString(36).slice(2, 10)}`, // Longer mock Gaya wallet address
+            balanceLux: 1000, // Starting balance
+            lastLogin: serverTimestamp()
+          }, { merge: true });
+        } catch (error) {
+          console.error("Failed to initialize user profile", error);
+        }
       }
     });
     return () => unsubscribe();
@@ -32,11 +36,15 @@ export default function App() {
 
   useEffect(() => {
     if (user && isAuthReady) {
-      const q = query(collection(db, 'users'), where('uid', '==', user.uid));
-      const unsubscribe = onSnapshot(q, (snapshot) => {
-        if (!snapshot.empty) {
-          setUserProfile(snapshot.docs[0].data());
+      const userDocRef = doc(db, 'users', user.uid);
+      const unsubscribe = onSnapshot(userDocRef, (snapshot) => {
+        if (snapshot.exists()) {
+          setUserProfile(snapshot.data());
         }
+      }, (error) => {
+        console.error("User profile listener failed", error);
+        // We don't necessarily want to crash the whole app for a profile load failure
+        // but we should log it properly if we had the handler
       });
       return () => unsubscribe();
     }
