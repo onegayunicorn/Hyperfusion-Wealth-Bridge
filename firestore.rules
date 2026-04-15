@@ -1,0 +1,141 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {uid}
+    // Fields:
+    //   - uid: string (required)
+    //   - email: string
+    //   - displayName: string
+    //   - gayaWalletAddress: string (required)
+    //   - balanceLux: number
+    //   - createdAt: timestamp
+    //
+    // Collection: nfts
+    // Document ID: {nftId}
+    // Fields:
+    //   - id: string
+    //   - name: string (required)
+    //   - description: string
+    //   - imageUrl: string (required)
+    //   - ownerUid: string (required)
+    //   - creatorUid: string
+    //   - priceEth: number
+    //   - isForSale: bool
+    //   - royaltyPercentage: number
+    //   - createdAt: timestamp
+    //
+    // Collection: lending
+    // Document ID: {positionId}
+    // Fields:
+    //   - uid: string (required)
+    //   - asset: string (ETH, LUX, BTC)
+    //   - amount: number
+    //   - type: string (deposit, borrow)
+    //   - collateralAmount: number
+    //   - interestRate: number
+    //   - lastUpdated: timestamp
+    //
+    // Collection: transactions
+    // Document ID: {txId}
+    // Fields:
+    //   - uid: string (required)
+    //   - type: string
+    //   - amount: number
+    //   - asset: string
+    //   - status: string
+    //   - timestamp: timestamp
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.uid;
+    }
+
+    function isNftOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.ownerUid;
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidUrl(url) {
+      return url is string && (url.matches("^https://.*") || url.matches("^http://.*"));
+    }
+
+    // Domain Validators
+    
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'gayaWalletAddress']) &&
+             data.uid == request.auth.uid &&
+             data.gayaWalletAddress is string &&
+             data.gayaWalletAddress.size() >= 30 && data.gayaWalletAddress.size() <= 64;
+    }
+
+    function isValidNft(data) {
+      return data.keys().hasAll(['name', 'imageUrl', 'ownerUid']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             isValidUrl(data.imageUrl) &&
+             data.ownerUid is string;
+    }
+
+    function isValidLending(data) {
+      return data.keys().hasAll(['uid', 'asset', 'amount', 'type']) &&
+             data.uid == request.auth.uid &&
+             data.asset in ['ETH', 'LUX', 'BTC'] &&
+             data.amount is number && data.amount >= 0 &&
+             data.type in ['deposit', 'borrow'];
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+      allow create: if isOwner(uid) && isValidUser(request.resource.data);
+      allow update: if isOwner(uid) && isValidUser(request.resource.data);
+    }
+
+    match /nfts/{nftId} {
+      allow read: if true; // Marketplace is public
+      allow create: if isAuthenticated() && isValidNft(request.resource.data) && request.resource.data.ownerUid == request.auth.uid;
+      allow update: if isAuthenticated() && (
+        // Owner can update price/sale status
+        (isNftOwner() && isValidNft(request.resource.data)) ||
+        // Buyer can update ownerUid if price is met (simplified for prototype)
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ownerUid', 'isForSale']) && resource.data.isForSale == true)
+      );
+    }
+
+    match /lending/{positionId} {
+      allow read: if isDocOwner();
+      allow create: if isAuthenticated() && isValidLending(request.resource.data);
+      allow update: if isDocOwner() && isValidLending(request.resource.data);
+      allow delete: if isDocOwner();
+    }
+
+    match /transactions/{txId} {
+      allow read: if isDocOwner();
+      allow create: if isAuthenticated() && request.resource.data.uid == request.auth.uid;
+    }
+  }
+}

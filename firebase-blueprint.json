@@ -1,0 +1,83 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and wallet information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "gayaWalletAddress": { "type": "string" },
+        "balanceLux": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "gayaWalletAddress"]
+    },
+    "NFT": {
+      "title": "NFT",
+      "description": "Non-fungible token metadata and ownership",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "ownerUid": { "type": "string" },
+        "creatorUid": { "type": "string" },
+        "priceEth": { "type": "number" },
+        "isForSale": { "type": "boolean" },
+        "royaltyPercentage": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "imageUrl", "ownerUid"]
+    },
+    "LendingPosition": {
+      "title": "Lending Position",
+      "description": "User's deposit or borrow position in the protocol",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "asset": { "type": "string", "enum": ["ETH", "LUX", "BTC"] },
+        "amount": { "type": "number" },
+        "type": { "type": "string", "enum": ["deposit", "borrow"] },
+        "collateralAmount": { "type": "number" },
+        "interestRate": { "type": "number" },
+        "lastUpdated": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "asset", "amount", "type"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "History of wallet and protocol activities",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "type": { "type": "string" },
+        "amount": { "type": "number" },
+        "asset": { "type": "string" },
+        "status": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "type", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": {
+      "schema": "User",
+      "description": "Private user profile data"
+    },
+    "/nfts/{nftId}": {
+      "schema": "NFT",
+      "description": "Global NFT marketplace items"
+    },
+    "/lending/{positionId}": {
+      "schema": "LendingPosition",
+      "description": "Protocol lending and borrowing positions"
+    },
+    "/transactions/{txId}": {
+      "schema": "Transaction",
+      "description": "User transaction history"
+    }
+  }
+}
